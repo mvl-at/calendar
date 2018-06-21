@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"fmt"
+	"github.com/mvl-at/model"
 	"net/http"
 )
 
@@ -18,5 +19,11 @@ func run() {
 
 //Registers all http routes.
 func routes() {
+	http.HandleFunc("/events", events)
+}
 
+func events(rw http.ResponseWriter, r *http.Request) {
+	events := make([]*model.Event, 0)
+	fetchEvents(&events)
+	writeEvents(&events, rw)
 }
