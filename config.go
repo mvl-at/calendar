@@ -30,7 +30,8 @@ func config() (conf *Configuration) {
 		conf = &Configuration{
 			Host:     "0.0.0.0",
 			Port:     8081,
-			RestHost: "127.0.0.1:8080"}
+			RestHost: "127.0.0.1:8080",
+			Threads:  0}
 		enc := json.NewEncoder(fil)
 		enc.SetIndent("", "  ")
 		err = enc.Encode(conf)
@@ -50,4 +51,5 @@ type Configuration struct {
 	Host     string `json:"host"`
 	Port     uint16 `json:"port"`
 	RestHost string `json:"restHost"`
+	Threads  int    `json:"threads"`
 }
