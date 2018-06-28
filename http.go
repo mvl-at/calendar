@@ -25,14 +25,5 @@ func routes() {
 func events(rw http.ResponseWriter, r *http.Request) {
 	events := make([]*model.Event, 0)
 	fetchEvents(&events)
-	threading := r.URL.Query().Get("threading")
-	tc := staticThreads
-	if threading == "dynamic" {
-		tc = dynamicThreads
-	}
-
-	if threading == "single" {
-		tc = mainThread
-	}
-	writeEvents(&events, rw, musicianConvert, tc)
+	writeEvents(&events, rw, musicianConvert, threadType)
 }
