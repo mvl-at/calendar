@@ -56,12 +56,14 @@ func musicianConvert(event *model.Event, buffer *strBuffer) {
 
 //converts events of the view of a non-musician
 func externalConvert(event *model.Event, buffer *strBuffer) {
-	buffer.WriteFmt("BEGIN:VEVENT")
-	t := event.Time
-	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute+time.Duration(t.Second())*time.Second).Format(icalFormat))
-	buffer.WriteFmt("SUMMARY:%s", event.Name)
-	buffer.WriteFmt("LOCATION:%s", event.Place)
-	buffer.WriteFmt("END:VEVENT")
+	if !event.Internal {
+		buffer.WriteFmt("BEGIN:VEVENT")
+		t := event.Time
+		buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute+time.Duration(t.Second())*time.Second).Format(icalFormat))
+		buffer.WriteFmt("SUMMARY:%s", event.Name)
+		buffer.WriteFmt("LOCATION:%s", event.Place)
+		buffer.WriteFmt("END:VEVENT")
+	}
 }
 
 //destroys thread if done and creates a new one
