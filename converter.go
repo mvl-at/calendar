@@ -4,6 +4,7 @@ import (
 	"github.com/mvl-at/model"
 	"net/http"
 	"runtime"
+	"time"
 )
 
 //date format string which is used in the ical format
@@ -18,7 +19,22 @@ func writeEvents(events *[]*model.Event, rw http.ResponseWriter, convertEvent co
 	if len(*events) < threads {
 		threads = len(*events)
 	}
+	writeHeader(rw)
 	control(events, rw, threads, convertEvent)
+	writeFooter(rw)
+}
+
+func writeHeader(rw http.ResponseWriter) {
+	buf := &strBuffer{}
+	buf.WriteFmt("BEGIN:VCALENDAR")
+	buf.WriteFmt("VERSION:2.0")
+	buf.WriteTo(rw)
+}
+
+func writeFooter(rw http.ResponseWriter) {
+	buf := &strBuffer{}
+	buf.WriteFmt("END:VCALENDAR")
+	buf.WriteTo(rw)
 }
 
 //function to write a event into a string buffer
@@ -29,11 +45,22 @@ type threadControl func(events *[]*model.Event, rw http.ResponseWriter, threads 
 
 //converts events of the view of a musician
 func musicianConvert(event *model.Event, buffer *strBuffer) {
-	buffer.WriteFmt("BEGIN:EVENT")
-	buffer.WriteFmt("DTSTART:%s", event.Date.Format(icalFormat))
+	buffer.WriteFmt("BEGIN:VEVENT")
+	t := event.MusicianTime
+	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute+time.Duration(t.Second())*time.Second).Format(icalFormat))
 	buffer.WriteFmt("SUMMARY:%s", event.Name)
-	buffer.WriteFmt("DESCRIPTION:%s", event.Note)
+	buffer.WriteFmt("DESCRIPTION:%s (%s)", event.Note, event.Uniform)
 	buffer.WriteFmt("LOCATION:%s", event.MusicianPlace)
+	buffer.WriteFmt("END:VEVENT")
+}
+
+//converts events of the view of a non-musician
+func externalConvert(event *model.Event, buffer *strBuffer) {
+	buffer.WriteFmt("BEGIN:VEVENT")
+	t := event.Time
+	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute+time.Duration(t.Second())*time.Second).Format(icalFormat))
+	buffer.WriteFmt("SUMMARY:%s", event.Name)
+	buffer.WriteFmt("LOCATION:%s", event.Place)
 	buffer.WriteFmt("END:VEVENT")
 }
 

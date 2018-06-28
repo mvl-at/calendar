@@ -25,5 +25,9 @@ func routes() {
 func events(rw http.ResponseWriter, r *http.Request) {
 	events := make([]*model.Event, 0)
 	fetchEvents(&events)
-	writeEvents(&events, rw, musicianConvert, threadType)
+	convert := externalConvert
+	if r.URL.Query().Get("int") == "true" {
+		convert = musicianConvert
+	}
+	writeEvents(&events, rw, convert, threadType)
 }
