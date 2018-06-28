@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/mvl-at/model"
 	"net/http"
+	"time"
 )
+
+const httpFormat = "20060102"
 
 //Runs the http Server.
 func run() {
@@ -23,8 +26,23 @@ func routes() {
 }
 
 func events(rw http.ResponseWriter, r *http.Request) {
+	from := r.URL.Query().Get("from")
+	to := r.URL.Query().Get("to")
+	last := r.URL.Query().Get("last")
+	if last == "year" {
+		from = time.Now().AddDate(-1, 0, 0).Format(httpFormat)
+	}
+	if last == "month" {
+		from = time.Now().AddDate(0, -1, 0).Format(httpFormat)
+	}
+	if last == "week" {
+		from = time.Now().AddDate(0, 0, -7).Format(httpFormat)
+	}
+	if last == "day" {
+		from = time.Now().AddDate(0, 0, -1).Format(httpFormat)
+	}
 	events := make([]*model.Event, 0)
-	fetchEvents(&events)
+	fetchEvents(&events, from, to)
 	convert := externalConvert
 	if r.URL.Query().Get("int") == "true" {
 		convert = musicianConvert
