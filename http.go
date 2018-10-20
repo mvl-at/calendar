@@ -22,10 +22,26 @@ func run() {
 
 //Registers all http routes.
 func routes() {
-	http.HandleFunc("/events", events)
+	http.HandleFunc("/ical", events)
+	http.HandleFunc("/pdf", pdf)
 }
 
 func events(rw http.ResponseWriter, r *http.Request) {
+	events := eventsFromRange(r)
+	convert := externalConvert
+	if r.URL.Query().Get("int") == "true" {
+		convert = musicianConvert
+	}
+	writeEvents(&events, rw, convert, threadType)
+}
+
+func pdf(rw http.ResponseWriter, r *http.Request) {
+	events := eventsFromRange(r)
+	note := r.URL.Query().Get("note")
+	writeEventsTo(events, note, rw)
+}
+
+func eventsFromRange(r *http.Request) []*model.Event {
 	from := r.URL.Query().Get("from")
 	to := r.URL.Query().Get("to")
 	last := r.URL.Query().Get("last")
@@ -43,9 +59,5 @@ func events(rw http.ResponseWriter, r *http.Request) {
 	}
 	events := make([]*model.Event, 0)
 	fetchEvents(&events, from, to)
-	convert := externalConvert
-	if r.URL.Query().Get("int") == "true" {
-		convert = musicianConvert
-	}
-	writeEvents(&events, rw, convert, threadType)
+	return events
 }
