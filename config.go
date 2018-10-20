@@ -34,8 +34,8 @@ func config() (conf *Configuration) {
 		rand.Read(jwtSecret)
 		conf = &Configuration{
 			Host:       "0.0.0.0",
-			Port:       8081,
-			RestHost:   "127.0.0.1:8080",
+			Port:       7303,
+			RestHost:   "127.0.0.1:7301",
 			ThreadType: StaticThreads,
 			Threads:    0}
 		enc := json.NewEncoder(fil)
