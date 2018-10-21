@@ -36,7 +36,7 @@ func fetchEvents(events *[]*model.Event, from string, to string) {
 	})
 }
 
-func fetchObmAndKpm() (obm model.Member, kpm model.Member){
+func fetchObmAndKpm() (obm model.Member, kpm model.Member) {
 	obm = model.Member{}
 	kpm = model.Member{}
 	var jsonData []byte
