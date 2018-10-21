@@ -203,6 +203,13 @@
         </li>
     {{ end }}
     </ul>
+{{ if .MarchMode }}
+    <ul>
+    {{ range .Marches }}
+        <li>{{ . }}</li>
+    {{ end }}
+    </ul>
+{{ end }}
 </div>
 {{ if .HasNote}}
 <div class="footer">{{ .Note}}</div>

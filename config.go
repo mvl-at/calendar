@@ -37,7 +37,11 @@ func config() (conf *Configuration) {
 			Port:       7303,
 			RestHost:   "127.0.0.1:7301",
 			ThreadType: StaticThreads,
-			Threads:    0}
+			Threads:    0,
+			Obm:        "Obmann",
+			Kpm:        "Kapellmeister",
+			King:       "Arnheim",
+			Marches:    []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"}}
 		enc := json.NewEncoder(fil)
 		enc.SetIndent("", "  ")
 		err = enc.Encode(conf)
@@ -68,9 +72,13 @@ func threadControlChooser() (threadControl threadControl) {
 
 //Struct which holds the configuration.
 type Configuration struct {
-	Host       string `json:"host"`
-	Port       uint16 `json:"port"`
-	RestHost   string `json:"restHost"`
-	ThreadType string `json:"threadType"`
-	Threads    int    `json:"threads"`
+	Host       string   `json:"host"`
+	Port       uint16   `json:"port"`
+	RestHost   string   `json:"restHost"`
+	ThreadType string   `json:"threadType"`
+	Threads    int      `json:"threads"`
+	Obm        string   `json:"obm"`
+	Kpm        string   `json:"kpm"`
+	King       string   `json:"king"`
+	Marches    []string `json:"marches"`
 }

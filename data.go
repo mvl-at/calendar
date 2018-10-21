@@ -35,3 +35,30 @@ func fetchEvents(events *[]*model.Event, from string, to string) {
 		return iTime.Unix() < jTime.Unix()
 	})
 }
+
+func fetchObmAndKpm() (obm model.Member, kpm model.Member){
+	obm = model.Member{}
+	kpm = model.Member{}
+	var jsonData []byte
+	resp, err := http.Get(fmt.Sprintf("http://%s/leaderRolesMembers", conf.RestHost))
+	if err != nil {
+		errLogger.Println(err.Error())
+		return
+	}
+	if resp.Body != nil {
+		jsonData, _ = ioutil.ReadAll(resp.Body)
+	} else {
+		return
+	}
+	leaders := make([]model.LeaderRoleMember, 0)
+	json.Unmarshal(jsonData, &leaders)
+	for _, leader := range leaders {
+		if leader.LeaderRole.Name == conf.Obm && !leader.Deputy {
+			obm = *leader.Member
+		}
+		if leader.LeaderRole.Name == conf.Kpm && !leader.Deputy {
+			kpm = *leader.Member
+		}
+	}
+	return
+}
