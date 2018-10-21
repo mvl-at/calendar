@@ -1,12 +1,10 @@
 package calendar
 
 import (
-	"fmt"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"github.com/mvl-at/model"
 	"html/template"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -59,13 +57,7 @@ func writeEventsTo(events []*model.Event, note string, obm string, kpm string, w
 
 	pdfg, _ := wkhtmltopdf.NewPDFGenerator()
 	pdfg.Title.Set("Termine")
-	pdfg.Dpi.Set(6000)
-	wd, _ := os.Getwd()
-	fmt.Println(wd)
-	err := os.Symlink("res", os.TempDir()+"/res")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	pdfg.Dpi.Set(600)
 	pr, pw := io.Pipe()
 	defer pr.Close()
 	go func() {
@@ -74,7 +66,7 @@ func writeEventsTo(events []*model.Event, note string, obm string, kpm string, w
 	}()
 	page := wkhtmltopdf.NewPageReader(pr)
 	pdfg.AddPage(page)
-	err = pdfg.Create()
+	err := pdfg.Create()
 	if err != nil {
 		errLogger.Println(err.Error())
 		return
