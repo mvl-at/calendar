@@ -41,7 +41,8 @@ func config() (conf *Configuration) {
 			Obm:        "Obmann",
 			Kpm:        "Kapellmeister",
 			King:       "Arnheim",
-			Marches:    []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"}}
+			Marches:    []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"},
+			Color:      "#134474FF"}
 		enc := json.NewEncoder(fil)
 		enc.SetIndent("", "  ")
 		err = enc.Encode(conf)
@@ -81,4 +82,5 @@ type Configuration struct {
 	Kpm        string   `json:"kpm"`
 	King       string   `json:"king"`
 	Marches    []string `json:"marches"`
+	Color      string   `json:"color"`
 }

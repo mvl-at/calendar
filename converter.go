@@ -28,6 +28,7 @@ func writeHeader(rw http.ResponseWriter) {
 	buf := &strBuffer{}
 	buf.WriteFmt("BEGIN:VCALENDAR")
 	buf.WriteFmt("VERSION:2.0")
+	buf.WriteFmt("X-APPLE-CALENDAR-COLOR:%s", conf.Color)
 	buf.WriteTo(rw)
 }
 
