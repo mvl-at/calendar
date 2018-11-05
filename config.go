@@ -33,16 +33,17 @@ func config() (conf *Configuration) {
 		jwtSecret := make([]byte, 8)
 		rand.Read(jwtSecret)
 		conf = &Configuration{
-			Host:       "0.0.0.0",
-			Port:       7303,
-			RestHost:   "127.0.0.1:7301",
-			ThreadType: StaticThreads,
-			Threads:    0,
-			Obm:        "Obmann",
-			Kpm:        "Kapellmeister",
-			King:       "Arnheim",
-			Marches:    []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"},
-			Color:      "#134474FF"}
+			Host:         "0.0.0.0",
+			Port:         7303,
+			RestHost:     "127.0.0.1:7301",
+			ThreadType:   StaticThreads,
+			Threads:      0,
+			Obm:          "Obmann",
+			Kpm:          "Kapellmeister",
+			King:         "Arnheim",
+			Marches:      []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"},
+			Color:        "#134474FF",
+			CalendarName: "Musikverein Leopoldsdorf"}
 		enc := json.NewEncoder(fil)
 		enc.SetIndent("", "  ")
 		err = enc.Encode(conf)
@@ -73,14 +74,15 @@ func threadControlChooser() (threadControl threadControl) {
 
 //Struct which holds the configuration.
 type Configuration struct {
-	Host       string   `json:"host"`
-	Port       uint16   `json:"port"`
-	RestHost   string   `json:"restHost"`
-	ThreadType string   `json:"threadType"`
-	Threads    int      `json:"threads"`
-	Obm        string   `json:"obm"`
-	Kpm        string   `json:"kpm"`
-	King       string   `json:"king"`
-	Marches    []string `json:"marches"`
-	Color      string   `json:"color"`
+	Host         string   `json:"host"`
+	Port         uint16   `json:"port"`
+	RestHost     string   `json:"restHost"`
+	ThreadType   string   `json:"threadType"`
+	Threads      int      `json:"threads"`
+	Obm          string   `json:"obm"`
+	Kpm          string   `json:"kpm"`
+	King         string   `json:"king"`
+	Marches      []string `json:"marches"`
+	Color        string   `json:"color"`
+	CalendarName string   `json:"calendarName"`
 }

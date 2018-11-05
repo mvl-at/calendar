@@ -29,6 +29,8 @@ func writeHeader(rw http.ResponseWriter) {
 	buf.WriteFmt("BEGIN:VCALENDAR")
 	buf.WriteFmt("VERSION:2.0")
 	buf.WriteFmt("X-APPLE-CALENDAR-COLOR:%s", conf.Color)
+	buf.WriteFmt("X-WR-CALNAME:%s", conf.CalendarName)
+	buf.WriteFmt("PRODID: mvl-at calendar")
 	buf.WriteTo(rw)
 }
 
@@ -48,9 +50,18 @@ type threadControl func(events *[]*model.Event, rw http.ResponseWriter, threads 
 func musicianConvert(event *model.Event, buffer *strBuffer) {
 	buffer.WriteFmt("BEGIN:VEVENT")
 	t := event.MusicianTime
-	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute+time.Duration(t.Second())*time.Second).Format(icalFormat))
+	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+	if event.OpenEnd == 0 {
+		t = event.End
+		buffer.WriteFmt("DTEND:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+	}
 	buffer.WriteFmt("SUMMARY:%s", event.Name)
-	buffer.WriteFmt("DESCRIPTION:%s (%s)", event.Note, event.Uniform)
+	if event.Internal {
+		buffer.WriteFmt("DESCRIPTION:Adjustierung: %s, %s", event.Uniform, event.Note)
+
+	} else {
+		buffer.WriteFmt("DESCRIPTION:Adjustierung: %s, Beginn: %s — %s, %s", event.Uniform, event.Time.Format("15:04"), event.Place, event.Note)
+	}
 	buffer.WriteFmt("LOCATION:%s", event.MusicianPlace)
 	buffer.WriteFmt("END:VEVENT")
 }
@@ -60,7 +71,11 @@ func externalConvert(event *model.Event, buffer *strBuffer) {
 	if !event.Internal {
 		buffer.WriteFmt("BEGIN:VEVENT")
 		t := event.Time
-		buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute+time.Duration(t.Second())*time.Second).Format(icalFormat))
+		buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+		if event.OpenEnd == 0 {
+			t = event.End
+			buffer.WriteFmt("DTEND:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+		}
 		buffer.WriteFmt("SUMMARY:%s", event.Name)
 		buffer.WriteFmt("LOCATION:%s", event.Place)
 		buffer.WriteFmt("END:VEVENT")
