@@ -27,6 +27,7 @@ func routes() {
 }
 
 func events(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("content-type", "text/calendar; charset=utf-8")
 	events := eventsFromRange(r)
 	convert := externalConvert
 	if r.URL.Query().Get("int") == "true" {

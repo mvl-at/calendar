@@ -1,10 +1,11 @@
 package calendar
 
 import (
-	"github.com/mvl-at/model"
 	"net/http"
 	"runtime"
 	"time"
+
+	"github.com/mvl-at/model"
 )
 
 //date format string which is used in the ical format
