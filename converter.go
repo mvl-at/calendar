@@ -51,10 +51,10 @@ type threadControl func(events *[]*model.Event, rw http.ResponseWriter, threads 
 func musicianConvert(event *model.Event, buffer *strBuffer) {
 	buffer.WriteFmt("BEGIN:VEVENT")
 	t := event.MusicianTime
-	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+	buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute).Format(icalFormat))
 	if event.OpenEnd == 0 {
 		t = event.End
-		buffer.WriteFmt("DTEND:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+		buffer.WriteFmt("DTEND:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute).Format(icalFormat))
 	}
 	buffer.WriteFmt("SUMMARY:%s", event.Name)
 	if event.Internal {
@@ -72,10 +72,10 @@ func externalConvert(event *model.Event, buffer *strBuffer) {
 	if !event.Internal {
 		buffer.WriteFmt("BEGIN:VEVENT")
 		t := event.Time
-		buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+		buffer.WriteFmt("DTSTART:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute).Format(icalFormat))
 		if event.OpenEnd == 0 {
 			t = event.End
-			buffer.WriteFmt("DTEND:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute).Format(icalFormat))
+			buffer.WriteFmt("DTEND:%s", event.Date.Add(time.Duration(t.Hour())*time.Hour+time.Duration(t.Minute())*time.Minute).Format(icalFormat))
 		}
 		buffer.WriteFmt("SUMMARY:%s", event.Name)
 		buffer.WriteFmt("LOCATION:%s", event.Place)
