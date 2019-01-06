@@ -38,8 +38,8 @@ func config() (conf *Configuration) {
 			RestHost:     "127.0.0.1:7301",
 			ThreadType:   StaticThreads,
 			Threads:      0,
-			Obm:          "Obmann",
-			Kpm:          "Kapellmeister",
+			Obm:          Person{Name: "Max Mustermann", Address: "Musterweg 19", Telephone: "06647315794", Role: "obmann"},
+			Kpm:          Person{Name: "Ursula Baum", Address: "Daham", Telephone: "06649146735", Role: "kapellmeister"},
 			King:         "Arnheim",
 			Marches:      []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"},
 			Color:        "#134474FF",
@@ -79,10 +79,17 @@ type Configuration struct {
 	RestHost     string   `json:"restHost"`
 	ThreadType   string   `json:"threadType"`
 	Threads      int      `json:"threads"`
-	Obm          string   `json:"obm"`
-	Kpm          string   `json:"kpm"`
+	Obm          Person   `json:"obm"`
+	Kpm          Person   `json:"kpm"`
 	King         string   `json:"king"`
 	Marches      []string `json:"marches"`
 	Color        string   `json:"color"`
 	CalendarName string   `json:"calendarName"`
+}
+
+type Person struct {
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	Telephone string `json:"telephone"`
+	Role      string `json:"role"`
 }
