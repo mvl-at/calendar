@@ -40,7 +40,7 @@ func pdf(rw http.ResponseWriter, r *http.Request) {
 	events := eventsFromRange(r)
 	note := r.URL.Query().Get("note")
 	kpm, obm := fetchObmAndKpm()
-	writeEventsTo(events, note, fmt.Sprintf("%s %s", obm.FirstName, obm.LastName), fmt.Sprintf("%s %s", kpm.FirstName, kpm.LastName), rw)
+	wkhtml(events, note, fmt.Sprintf("%s %s", obm.FirstName, obm.LastName), fmt.Sprintf("%s %s", kpm.FirstName, kpm.LastName), rw)
 }
 
 func eventsFromRange(r *http.Request) []*model.Event {
