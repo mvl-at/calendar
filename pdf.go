@@ -97,6 +97,7 @@ const (
 	headerWidthMultiplier = 0.8
 	eventMargin           = 4
 	infoMargin            = 4
+	infoXMargin           = 32
 )
 
 func fpdf(events []*model.Event, note string, obm string, kpm string, writer io.Writer) {
@@ -134,9 +135,9 @@ func fpdf(events []*model.Event, note string, obm string, kpm string, writer io.
 		return gr
 	}
 	header := func() {
-		pdf.SetFontSize(headerSize)
+		pdf.SetFont("", "B", headerSize)
 		title := "Musikverein Leopoldsdorf/M."
-		beginY := pdf.GetX()
+		beginY := pdf.GetY()
 		widths := make([]float64, 4)
 		widths[0] = center(title, "")
 		pdf.SetFontSize(smallSize)
@@ -163,50 +164,56 @@ func fpdf(events []*model.Event, note string, obm string, kpm string, writer io.
 		pdf.Rect((pageWidth-boxWidth)/2, beginY, boxWidth, boxHeight, "D")
 	}
 
-	drawEventLine := func(text string) float64 {
+	drawEventLine := func(text string, bold bool) float64 {
 		text = tr(text)
 		pdf.SetFontSize(stdSize)
 		oldX := pdf.GetX()
 		pdf.SetX(oldX + eventMargin)
 		textWidth := pdf.GetStringWidth(text)
 		fontSize, _ := pdf.GetFontSize()
+		if bold {
+			pdf.SetFont("", "B", 12)
+		}
 		pdf.CellFormat(textWidth+4, fontSize/2, text, "0", 1, "C", false, 0, "")
 		pdf.SetX(oldX)
+		if bold {
+			pdf.SetFont("", "", 12)
+		}
 		return textWidth
 	}
 
 	drawEvent := func(event *RenderedEvent, widths *[]float64, descriptors bool) {
 		if descriptors {
-			*widths = append(*widths, drawEventLine(event.Date))
+			*widths = append(*widths, drawEventLine(event.Date, true))
 		} else {
-			drawEventLine(event.Name)
+			drawEventLine(event.Name, true)
 		}
 		if event.HasVenue {
 			if descriptors {
-				*widths = append(*widths, drawEventLine("Treffpunkt:"))
+				*widths = append(*widths, drawEventLine("Treffpunkt:", false))
 			} else {
-				drawEventLine(event.Venue)
+				drawEventLine(event.Venue, false)
 			}
 		}
 		if event.HasBegin {
 			if descriptors {
-				*widths = append(*widths, drawEventLine("Beginn:"))
+				*widths = append(*widths, drawEventLine("Beginn:", false))
 			} else {
-				drawEventLine(event.Begin)
+				drawEventLine(event.Begin, false)
 			}
 		}
 		if event.HasUniform {
 			if descriptors {
-				*widths = append(*widths, drawEventLine("Adjustierung:"))
+				*widths = append(*widths, drawEventLine("Adjustierung:", false))
 			} else {
-				drawEventLine(event.Uniform)
+				drawEventLine(event.Uniform, false)
 			}
 		}
 		if event.HasNote {
 			if descriptors {
-				*widths = append(*widths, drawEventLine("Notiz:"))
+				*widths = append(*widths, drawEventLine("Notiz:", false))
 			} else {
-				drawEventLine(event.Note)
+				drawEventLine(event.Note, false)
 			}
 		}
 	}
@@ -214,6 +221,10 @@ func fpdf(events []*model.Event, note string, obm string, kpm string, writer io.
 	evs := renderAllEvents(events)
 
 	drawEvents := func() {
+		pdf.SetFont("", "B", headerSize)
+		pdf.SetY(pdf.GetY() + eventMargin)
+		center(tr(rangeString(events, note)), "")
+		pdf.SetFont("", "", stdSize)
 		widths := make([]float64, 0)
 		oldY := pdf.GetY()
 		for _, v := range evs {
@@ -231,18 +242,36 @@ func fpdf(events []*model.Event, note string, obm string, kpm string, writer io.
 		}
 	}
 
+	personString := func(person Person, bold bool, role string) string {
+		boldStart := "<b>"
+		boldEnd := "</b>"
+		mailStart := "<a href=\"mailto:" + person.Email + "\">"
+		mailEnd := "</a>"
+		if !bold {
+			boldEnd = ""
+			boldStart = ""
+			mailStart = ""
+			mailEnd = ""
+		}
+		return fmt.Sprintf("%s%s:%s %s, %s, %s, %s%s%s", boldStart, role, boldEnd, person.Name, person.Address, person.Telephone, mailStart, person.Email, mailEnd)
+	}
+
 	infoHeader := func() {
 		pdf.SetY(pdf.GetY() + infoMargin)
 		pdf.SetFontSize(smallSize)
-		obm := fmt.Sprintf("Obmann: %s, %s, %s, obmann@mvl.at", conf.Obm.Name, conf.Obm.Address, conf.Obm.Telephone)
-		kpm := fmt.Sprintf("Kapellmeister: %s, %s, %s, kapellmeister@mvl.at", conf.Kpm.Name, conf.Kpm.Address, conf.Kpm.Telephone)
-		center(obm, "")
-		center(kpm, "")
+		html := pdf.HTMLBasicNew()
 		pageWidth, _ := pdf.GetPageSize()
+		//pdf.SetX((pageWidth - pdf.GetStringWidth(personString(conf.Obm, false, "Obmann"))) / 2)
+		pdf.SetX(infoXMargin)
+		html.Write(smallSize, personString(conf.Obm, true, "Obmann"))
+		pdf.Ln(smallSize / 2)
+		//pdf.SetX((pageWidth - pdf.GetStringWidth(personString(conf.Kpm, false, "Kapellmeister"))) / 2)
+		pdf.SetX(infoXMargin)
+		html.Write(smallSize, personString(conf.Kpm, true, "Kapellmeister"))
+		pdf.Ln(smallSize / 2)
 		pdf.SetY(pdf.GetY() + eventMargin)
 		pdf.Line(pdf.GetX()+eventMargin, pdf.GetY(), pageWidth-pdf.GetX()-eventMargin, pdf.GetY())
-		pdf.SetFontSize(headerSize)
-		center(tr(rangeString(events, note)), "")
+
 	}
 
 	header()
