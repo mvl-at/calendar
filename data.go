@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+type UserInfo struct {
+	Member *model.Member `json:"member"`
+	Roles  []*model.Role `json:"roles"`
+}
+
 func fetchEvents(events *[]*model.Event, from string, to string) {
 	var jsonData []byte
 	resp, err := http.Get(fmt.Sprintf("http://%s/eventsrange?from=%s&to=%s", conf.RestHost, from, to))
@@ -61,4 +66,23 @@ func fetchObmAndKpm() (obm model.Member, kpm model.Member) {
 		}
 	}
 	return
+}
+
+func fetchAuthor(jwt string) UserInfo {
+	author := UserInfo{}
+	request, err := http.NewRequest(http.MethodGet, conf.RestHost+"/userinfo", nil)
+	if err != nil {
+		errLogger.Println(err.Error())
+	} else {
+		client := http.DefaultClient
+		request.Header.Set("Access-token", jwt)
+		response, err := client.Do(request)
+		if err != nil {
+			errLogger.Println(err.Error())
+		} else {
+			decoder := json.NewDecoder(response.Body)
+			decoder.Decode(&author)
+		}
+	}
+	return author
 }

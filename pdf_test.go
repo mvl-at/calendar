@@ -44,7 +44,7 @@ func TestOutput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	fpdf(testEvents, "Des is a notiz", out)
+	fpdf(testEvents, "Des is a notiz", "Ich", out)
 }
 
 //func ExampleFpdf_MultiCell() {

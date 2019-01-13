@@ -37,21 +37,21 @@ func rangeString(events []*model.Event, note string) string {
 }
 
 const (
-	headerSize            = 18
-	stdSize               = 12
-	smallSize             = 9
-	eventMargin           = 4
-	infoMargin            = 4
-	infoXMargin           = 32
+	headerSize  = 18
+	stdSize     = 12
+	smallSize   = 9
+	eventMargin = 4
+	infoMargin  = 4
+	infoXMargin = 32
 )
 
-func fpdf(events []*model.Event, note string, writer io.Writer) {
+func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 	sort.Slice(events, func(i, j int) bool {
 		return events[i].Date.Unix() < events[j].Date.Unix()
 	})
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	defer pdf.Close()
-	pdf.SetAuthor("Karl Steinscheisser", true)
+	pdf.SetAuthor(author, true)
 	pdf.SetAutoPageBreak(true, 10)
 	pdf.SetFont("Arial", "", stdSize)
 	pdf.AddPage()
@@ -168,7 +168,9 @@ func fpdf(events []*model.Event, note string, writer io.Writer) {
 	drawEvents := func() {
 		pdf.SetFont("", "B", headerSize)
 		pdf.SetY(pdf.GetY() + eventMargin)
-		center(tr(rangeString(events, note)), "")
+		title := rangeString(events, note)
+		pdf.SetTitle(title, true)
+		center(tr(title), "")
 		pdf.SetFont("", "", stdSize)
 		widths := make([]float64, 0)
 		oldY := pdf.GetY()
