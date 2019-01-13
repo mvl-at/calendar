@@ -60,7 +60,6 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		pageWidth, _ := pdf.GetPageSize()
 		textWidth := pdf.GetStringWidth(text) + 2
 		pdf.SetX((pageWidth - textWidth) / 2)
-		//pdf.Write(0, text)
 		fontSize, _ := pdf.GetFontSize()
 		isLink := 0
 		if link != "" {
@@ -208,11 +207,9 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		pdf.SetFontSize(smallSize)
 		html := pdf.HTMLBasicNew()
 		pageWidth, _ := pdf.GetPageSize()
-		//pdf.SetX((pageWidth - pdf.GetStringWidth(personString(conf.Obm, false, "Obmann"))) / 2)
 		pdf.SetX(infoXMargin)
 		html.Write(smallSize, personString(conf.Obm, true, "Obmann"))
 		pdf.Ln(smallSize / 2)
-		//pdf.SetX((pageWidth - pdf.GetStringWidth(personString(conf.Kpm, false, "Kapellmeister"))) / 2)
 		pdf.SetX(infoXMargin)
 		html.Write(smallSize, personString(conf.Kpm, true, "Kapellmeister"))
 		pdf.Ln(smallSize / 2)

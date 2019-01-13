@@ -40,7 +40,7 @@ func pdf(rw http.ResponseWriter, r *http.Request) {
 	events := eventsFromRange(r)
 	note := r.URL.Query().Get("note")
 	author := fetchAuthor(r.Header.Get("Access-token"))
-	fpdf(events, note, author.Member.FirstName + " " + author.Member.LastName, rw)
+	fpdf(events, note, author.Member.FirstName+" "+author.Member.LastName, rw)
 }
 
 func eventsFromRange(r *http.Request) []*model.Event {
