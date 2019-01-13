@@ -2,31 +2,14 @@ package calendar
 
 import (
 	"fmt"
-	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/mvl-at/model"
-	"html/template"
 	"io"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 )
-
-const (
-	eventTemplate = "events.html"
-)
-
-type EventListInfo struct {
-	Events    []*RenderedEvent
-	Obm       string
-	Kpm       string
-	Note      string
-	HasNote   bool
-	Range     string
-	MarchMode bool
-	Marches   []string
-}
 
 func rangeString(events []*model.Event, note string) string {
 	rangeString := "Terminplan für gute Märsche"
@@ -53,54 +36,16 @@ func rangeString(events []*model.Event, note string) string {
 	return rangeString
 }
 
-func wkhtml(events []*model.Event, note string, obm string, kpm string, writer io.Writer) {
-	t, _ := template.ParseFiles(eventTemplate)
-	rangeString := rangeString(events, note)
-	marchMode := false
-
-	if len(events) <= 0 && strings.ToLower(note) == strings.ToLower(conf.King) {
-		rangeString = "gute Märsche"
-		marchMode = true
-	} else {
-		note = conf.King
-	}
-
-	data := EventListInfo{Events: renderAllEvents(events), Obm: obm, Kpm: kpm, Note: note, HasNote: note != "", Range: rangeString, MarchMode: marchMode, Marches: conf.Marches}
-
-	pdfg, _ := wkhtmltopdf.NewPDFGenerator()
-	pdfg.Title.Set("Termine")
-	pdfg.Dpi.Set(600)
-	pr, pw := io.Pipe()
-	defer pr.Close()
-	go func() {
-		defer pw.Close()
-		t.Execute(pw, data)
-	}()
-	page := wkhtmltopdf.NewPageReader(pr)
-	pdfg.AddPage(page)
-	err := pdfg.Create()
-	if err != nil {
-		errLogger.Println(err.Error())
-		return
-	}
-	if err != nil {
-		errLogger.Println(err.Error())
-		return
-	}
-	io.Copy(writer, pdfg.Buffer())
-}
-
 const (
 	headerSize            = 18
 	stdSize               = 12
 	smallSize             = 9
-	headerWidthMultiplier = 0.8
 	eventMargin           = 4
 	infoMargin            = 4
 	infoXMargin           = 32
 )
 
-func fpdf(events []*model.Event, note string, obm string, kpm string, writer io.Writer) {
+func fpdf(events []*model.Event, note string, writer io.Writer) {
 	sort.Slice(events, func(i, j int) bool {
 		return events[i].Date.Unix() < events[j].Date.Unix()
 	})
