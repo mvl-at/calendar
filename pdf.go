@@ -80,14 +80,14 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 	}
 	header := func() {
 		pdf.SetFont("", "B", headerSize)
-		title := "Musikverein Leopoldsdorf/M."
+		title := conf.Name
 		beginY := pdf.GetY()
 		widths := make([]float64, 4)
 		widths[0] = center(title, "")
 		pdf.SetFontSize(smallSize)
-		widths[1] = center("www.mvl.at", "")
-		widths[2] = center("ZVR - Zahl: 091786949", "")
-		widths[3] = center("A-2285 Leopoldsdorf/M. Kempfendorf 2", "")
+		widths[1] = center(conf.HomePage, "")
+		widths[2] = center(conf.ZVR, "")
+		widths[3] = center(conf.Address, "")
 		pageWidth, _ := pdf.GetPageSize()
 		boxWidth := greatest(&widths) + 10
 		boxHeight := pdf.GetY() - beginY

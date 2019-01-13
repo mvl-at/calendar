@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -45,7 +46,7 @@ func fetchObmAndKpm() (obm model.Member, kpm model.Member) {
 	obm = model.Member{}
 	kpm = model.Member{}
 	var jsonData []byte
-	resp, err := http.Get(fmt.Sprintf("http://%s/leaderRolesMembers", conf.RestHost))
+	resp, err := http.Get(conf.RestHost + "/leaderRolesMembers")
 	if err != nil {
 		errLogger.Println(err.Error())
 		return
@@ -68,8 +69,9 @@ func fetchObmAndKpm() (obm model.Member, kpm model.Member) {
 	return
 }
 
-func fetchAuthor(jwt string) UserInfo {
-	author := UserInfo{}
+func fetchAuthor(jwt string) (author UserInfo, ok bool) {
+	ok = false
+	author = UserInfo{}
 	request, err := http.NewRequest(http.MethodGet, conf.RestHost+"/userinfo", nil)
 	if err != nil {
 		errLogger.Println(err.Error())
@@ -82,7 +84,21 @@ func fetchAuthor(jwt string) UserInfo {
 		} else {
 			decoder := json.NewDecoder(response.Body)
 			decoder.Decode(&author)
+			ok = true
 		}
 	}
-	return author
+	return
+}
+
+func hasRole(user *UserInfo, role string) bool {
+	r := strings.ToLower(role)
+	if r == "root" {
+		return true
+	}
+	for _, ro := range user.Roles {
+		if strings.ToLower(ro.Id) == r {
+			return true
+		}
+	}
+	return false
 }

@@ -43,7 +43,11 @@ func config() (conf *Configuration) {
 			King:         "Arnheim",
 			Marches:      []string{"Arnheim", "Koline Koline", "Castaldo", "Attila", "Olympia", "Rázně Vpřed", "Florentinský", "Muziky, Muziky", "Slavnostní", "Fanfarovy"},
 			Color:        "#134474FF",
-			CalendarName: "Musikverein Leopoldsdorf"}
+			CalendarName: "Musikverein Leopoldsdorf",
+			Name:         "Musikverein Leopoldsdorf/M.",
+			Address:      "A-2285 Leopoldsdorf/M. Kempfendorf 2",
+			ZVR:          "ZVR - Zahl: 091786949",
+			Role:         "events"}
 		enc := json.NewEncoder(fil)
 		enc.SetIndent("", "  ")
 		err = enc.Encode(conf)
@@ -85,6 +89,11 @@ type Configuration struct {
 	Marches      []string `json:"marches"`
 	Color        string   `json:"color"`
 	CalendarName string   `json:"calendarName"`
+	Name         string   `json:"name"`
+	HomePage     string   `json:"homepage"`
+	Address      string   `json:"address"`
+	ZVR          string   `json:"zvr"`
+	Role         string   `json:"role"`
 }
 
 type Person struct {
