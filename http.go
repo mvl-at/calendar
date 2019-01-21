@@ -28,6 +28,7 @@ func routes() {
 
 func events(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("content-type", "text/calendar; charset=utf-8")
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	events := eventsFromRange(r)
 	convert := externalConvert
 	if r.URL.Query().Get("int") == "true" {
@@ -37,12 +38,21 @@ func events(rw http.ResponseWriter, r *http.Request) {
 }
 
 func pdf(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("content-type", "application/pdf")
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Access-Control-Expose-Headers", "access-token,Content-Disposition")
+	if r.Method == http.MethodOptions {
+		rw.Header().Set("Access-Control-Allow-Methods", "GET,OPTIONS")
+		rw.Header().Set("Access-Control-Allow-Headers", "access-token,content-type")
+		return
+	}
 	events := eventsFromRange(r)
 	note := r.URL.Query().Get("note")
 	author, ok := fetchAuthor(r.Header.Get("Access-token"))
-	if !ok && hasRole(&author, conf.Role) {
+	if !ok || hasRole(&author, conf.Role) {
 		rw.WriteHeader(http.StatusForbidden)
 	} else {
+		rw.Header().Set("Content-Disposition", fmt.Sprintf("inline;filename=\"%s.pdf\"", normalise(rangeString(events, ""))))
 		fpdf(events, note, author.Member.FirstName+" "+author.Member.LastName, rw)
 	}
 }

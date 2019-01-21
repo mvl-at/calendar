@@ -7,34 +7,7 @@ import (
 	"io"
 	"os"
 	"sort"
-	"strconv"
-	"strings"
 )
-
-func rangeString(events []*model.Event, note string) string {
-	rangeString := "Terminplan für gute Märsche"
-	if strings.ToLower(note) == strings.ToLower(conf.King) {
-		rangeString = "Gute Märsche"
-	}
-	if len(events) > 0 {
-		firstYear := events[0].Date.Year()
-		lastYear := events[len(events)-1].Date.Year()
-		firstMonth := events[0].Date.Month()
-		lastMonth := events[len(events)-1].Date.Month()
-
-		if firstYear == lastYear {
-			if firstMonth == lastMonth {
-				rangeString = months[firstMonth] + " " + strconv.Itoa(firstYear)
-			} else {
-				rangeString = months[firstMonth] + " bis " + months[lastMonth] + " " + strconv.Itoa(firstYear)
-			}
-		} else {
-			rangeString = months[firstMonth] + " " + strconv.Itoa(firstYear) + " bis " + months[lastMonth] + " " + strconv.Itoa(lastYear)
-		}
-		rangeString = "Terminplan " + rangeString
-	}
-	return rangeString
-}
 
 const (
 	headerSize  = 18

@@ -18,7 +18,7 @@ type UserInfo struct {
 
 func fetchEvents(events *[]*model.Event, from string, to string) {
 	var jsonData []byte
-	resp, err := http.Get(fmt.Sprintf("http://%s/eventsrange?from=%s&to=%s", conf.RestHost, from, to))
+	resp, err := http.Get(fmt.Sprintf("%s/eventsrange?from=%s&to=%s", conf.RestHost, from, to))
 
 	if err != nil {
 		errLogger.Println(err.Error())
@@ -84,7 +84,7 @@ func fetchAuthor(jwt string) (author UserInfo, ok bool) {
 		} else {
 			decoder := json.NewDecoder(response.Body)
 			decoder.Decode(&author)
-			ok = true
+			ok = author.Member != nil
 		}
 	}
 	return
