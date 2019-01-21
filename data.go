@@ -59,10 +59,10 @@ func fetchObmAndKpm() (obm model.Member, kpm model.Member) {
 	leaders := make([]model.LeaderRoleMember, 0)
 	json.Unmarshal(jsonData, &leaders)
 	for _, leader := range leaders {
-		if leader.LeaderRole.Name == conf.Obm.Role && !leader.Deputy {
+		if strings.ToLower(leader.LeaderRole.Name) == strings.ToLower(conf.Obm.Role) && !leader.Deputy {
 			obm = *leader.Member
 		}
-		if leader.LeaderRole.Name == conf.Kpm.Role && !leader.Deputy {
+		if strings.ToLower(leader.LeaderRole.Name) == strings.ToLower(conf.Kpm.Role) && !leader.Deputy {
 			kpm = *leader.Member
 		}
 	}
