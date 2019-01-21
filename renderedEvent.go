@@ -36,6 +36,7 @@ type RenderedEvent struct {
 	Venue   string
 	Note    string
 	Uniform string
+	End     string
 
 	HasDate    bool
 	HasName    bool
@@ -43,15 +44,27 @@ type RenderedEvent struct {
 	HasVenue   bool
 	HasNote    bool
 	HasUniform bool
+	HasEnd     bool
 }
 
 func renderEvent(event *model.Event) *RenderedEvent {
+	end := func(event2 *model.Event) string {
+		switch event2.OpenEnd {
+		case 0:
+			return event.End.Format("15:04 Uhr")
+		case 1:
+			return "offen"
+		default:
+			return "unbekannt"
+		}
+	}
 	re := &RenderedEvent{
 		Name:    event.Name,
 		Note:    event.Note,
 		Uniform: event.Uniform,
 		Date:    fmt.Sprintf(event.Date.Format("%s, 02.01.06"), weekDays[event.Date.Weekday()]),
 		Begin:   event.Place + ", " + event.Time.Format("15:04 Uhr"),
+		End:     end(event),
 		Venue:   event.MusicianPlace + ", " + event.MusicianTime.Format("15:04 Uhr")}
 	re.HasBegin = !event.Internal
 	re.HasDate = re.Date != ""
@@ -59,6 +72,7 @@ func renderEvent(event *model.Event) *RenderedEvent {
 	re.HasNote = re.Note != ""
 	re.HasUniform = re.Uniform != ""
 	re.HasVenue = re.Venue != ""
+	re.HasEnd = true
 	return re
 }
 

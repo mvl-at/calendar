@@ -25,6 +25,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	defer pdf.Close()
 	pdf.SetAuthor(author, true)
+	pdf.SetCreator("Musikverein Leopoldsdorf Webseite", false)
 	pdf.SetAutoPageBreak(true, 10)
 	pdf.SetFont("Arial", "", stdSize)
 	pdf.AddPage()
@@ -126,6 +127,13 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 				drawEventLine(event.Uniform, false)
 			}
 		}
+		if event.HasEnd {
+			if descriptors {
+				*widths = append(*widths, drawEventLine("Ende:", false))
+			} else {
+				drawEventLine(event.End, false)
+			}
+		}
 		if event.HasNote {
 			if descriptors {
 				*widths = append(*widths, drawEventLine("Notiz:", false))
@@ -196,5 +204,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 	pdf.SetX(0)
 	drawEvents()
 
-	fmt.Println(pdf.Output(writer))
+	if err := pdf.Output(writer); err != nil {
+		errLogger.Println(err.Error())
+	}
 }
