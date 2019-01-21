@@ -14,9 +14,8 @@ RUN go install -ldflags '-s -w' ./cmd/calserve
 
 # ---
 
-FROM alpine:edge
+FROM scratch
 COPY --from=build /go/bin/calserve /calserve
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; apk update; apk add --no-cache wkhtmltopdf ghostscript-fonts
 WORKDIR /calendar-data
 VOLUME  /calendar-data
 EXPOSE  7303
