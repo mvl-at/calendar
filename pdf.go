@@ -16,6 +16,7 @@ const (
 	eventMargin = 4
 	infoMargin  = 4
 	infoXMargin = 32
+	boxMarginY = 22
 )
 
 func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
@@ -26,7 +27,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 	defer pdf.Close()
 	pdf.SetAuthor(author, true)
 	pdf.SetCreator("Musikverein Leopoldsdorf Webseite", false)
-	pdf.SetAutoPageBreak(true, 10)
+	pdf.SetAutoPageBreak(true, 4)
 	pdf.SetFont("Arial", "", stdSize)
 	pdf.AddPage()
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
@@ -196,13 +197,23 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		pdf.Ln(smallSize / 2)
 		pdf.SetY(pdf.GetY() + eventMargin)
 		pdf.Line(pdf.GetX()+eventMargin, pdf.GetY(), pageWidth-pdf.GetX()-eventMargin, pdf.GetY())
+	}
 
+	noteBox := func() {
+		if len(note) > 0 {
+			width , height := pdf.GetPageSize()
+			pdf.SetY(height - boxMarginY)
+			pdf.SetFontSize(smallSize)
+			pdf.SetX(infoXMargin)
+			pdf.MultiCell(width-(infoXMargin*2), smallSize/1.5, tr(note), "1", "c",false)
+		}
 	}
 
 	header()
 	infoHeader()
 	pdf.SetX(0)
 	drawEvents()
+	noteBox()
 
 	if err := pdf.Output(writer); err != nil {
 		errLogger.Println(err.Error())

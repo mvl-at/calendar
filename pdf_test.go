@@ -44,7 +44,7 @@ func TestOutput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	fpdf(testEvents, "Des is a notiz", "Ich", out)
+	fpdf(testEvents, "Des is a notiz i mach jetzt eune ÜÜÜÖÖ&&&überraschung das wird a ganz langer text der alles aus dem rahmen sprengen wird damit man sieht was dann passiern", "Ich", out)
 }
 
 //func ExampleFpdf_MultiCell() {
