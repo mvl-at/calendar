@@ -132,6 +132,8 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		title := rangeString(events, note)
 		pdf.SetTitle(title, true)
 		center(tr(title), "")
+		fontSize, _ := pdf.GetFontSize()
+		pdf.Ln(fontSize / 2)
 		pdf.SetFont("", "", stdSize)
 		widths := make([]float64, 0)
 		oldY := pdf.GetY()
