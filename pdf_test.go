@@ -39,12 +39,17 @@ var testEvents = []*model.Event{
 		Internal:      true}}
 
 func TestOutput(t *testing.T) {
+	reps := 8
+	nevs := make([]*model.Event, len(testEvents)*reps)
+	for e := range nevs {
+		nevs[e] = testEvents[e%len(testEvents)]
+	}
 	out, err := os.OpenFile("test-plan.pdf", os.O_CREATE|os.O_RDWR, os.ModePerm)
 	defer out.Close()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	fpdf(testEvents, "Des is a notiz i mach jetzt eune ÜÜÜÖÖ&&&überraschung das wird a ganz langer text der alles aus dem rahmen sprengen wird damit man sieht was dann passiern", "Ich", out)
+	fpdf(nevs, "Des is a notiz i mach jetzt eune ÜÜÜÖÖ&&&überraschung das wird a ganz langer text der alles aus dem rahmen sprengen wird damit man sieht was dann passiern", "Ich", out)
 }
 
 //func ExampleFpdf_MultiCell() {
