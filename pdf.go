@@ -82,7 +82,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		ldfLogo := pdf.RegisterImageReader("ldf", "png", ldfF)
 		mvlLogo := pdf.RegisterImageReader("mvl", "png", mvlF)
 		ldfWidth := (boxHeight / ldfLogo.Height()) * ldfLogo.Width()
-		mvlWidth := ldfWidth * 1.5
+		mvlWidth := ldfWidth
 		mvlHeight := mvlWidth / mvlLogo.Width() * mvlLogo.Height()
 		pdf.Image("ldf", ((pageWidth-boxWidth)/2-ldfWidth)/2, beginY, ldfWidth, boxHeight, false, "", 0, "")
 		pdf.Image("mvl", (pageWidth-(pageWidth-boxWidth)/4)-mvlWidth/2, beginY+(boxHeight-mvlHeight)/2, mvlWidth, mvlHeight, false, "", 0, "")
@@ -111,11 +111,9 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		if !renderer.Render(event) {
 			return
 		}
-		//oldY := pdf.GetY()
 		oldX := pdf.GetX()
 		str, bold := renderer.FieldDescription(event)
 		drawEventLine(str, bold, 0)
-		//pdf.SetY(oldY)
 		pdf.SetX(oldX + maxWidth + eventMargin)
 		str, bold = renderer.FieldValue(event)
 		drawEventLine(str, bold, 1)
