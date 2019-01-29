@@ -16,8 +16,14 @@ const (
 	eventMargin = 4
 	infoMargin  = 4
 	infoXMargin = 32
-	boxMarginY = 22
+	boxMarginY  = 22
 )
+
+type RenderedEventField struct {
+	FieldDescription func(event *RenderedEvent) (str string, bold bool)
+	FieldValue       func(event *RenderedEvent) (str string, bold bool)
+	Render           func(event *RenderedEvent) bool
+}
 
 func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 	sort.Slice(events, func(i, j int) bool {
@@ -83,7 +89,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		pdf.Rect((pageWidth-boxWidth)/2, beginY, boxWidth, boxHeight, "D")
 	}
 
-	drawEventLine := func(text string, bold bool) float64 {
+	drawEventLine := func(text string, bold bool, line int) float64 {
 		text = tr(text)
 		pdf.SetFontSize(stdSize)
 		oldX := pdf.GetX()
@@ -93,7 +99,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		if bold {
 			pdf.SetFont("", "B", 12)
 		}
-		pdf.CellFormat(textWidth+4, fontSize/2, text, "0", 1, "C", false, 0, "")
+		pdf.Write(fontSize/2, text)
 		pdf.SetX(oldX)
 		if bold {
 			pdf.SetFont("", "", 12)
@@ -101,47 +107,21 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		return textWidth
 	}
 
-	drawEvent := func(event *RenderedEvent, widths *[]float64, descriptors bool) {
-		if descriptors {
-			*widths = append(*widths, drawEventLine(event.Date, true))
-		} else {
-			drawEventLine(event.Name, true)
+	drawEvent := func(event *RenderedEvent, renderer *RenderedEventField, maxWidth float64) {
+		if !renderer.Render(event) {
+			return
 		}
-		if event.HasVenue {
-			if descriptors {
-				*widths = append(*widths, drawEventLine("Treffpunkt:", false))
-			} else {
-				drawEventLine(event.Venue, false)
-			}
-		}
-		if event.HasBegin {
-			if descriptors {
-				*widths = append(*widths, drawEventLine("Beginn:", false))
-			} else {
-				drawEventLine(event.Begin, false)
-			}
-		}
-		if event.HasUniform {
-			if descriptors {
-				*widths = append(*widths, drawEventLine("Adjustierung:", false))
-			} else {
-				drawEventLine(event.Uniform, false)
-			}
-		}
-		if event.HasEnd {
-			if descriptors {
-				*widths = append(*widths, drawEventLine("Ende:", false))
-			} else {
-				drawEventLine(event.End, false)
-			}
-		}
-		if event.HasNote {
-			if descriptors {
-				*widths = append(*widths, drawEventLine("Notiz:", false))
-			} else {
-				drawEventLine(event.Note, false)
-			}
-		}
+		//oldY := pdf.GetY()
+		oldX := pdf.GetX()
+		str, bold := renderer.FieldDescription(event)
+		drawEventLine(str, bold, 0)
+		//pdf.SetY(oldY)
+		pdf.SetX(oldX + maxWidth + eventMargin)
+		str, bold = renderer.FieldValue(event)
+		drawEventLine(str, bold, 1)
+		fontSize, _ := pdf.GetFontSize()
+		pdf.Ln(fontSize / 2)
+		pdf.SetX(oldX)
 	}
 
 	evs := renderAllEvents(events)
@@ -155,18 +135,94 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		pdf.SetFont("", "", stdSize)
 		widths := make([]float64, 0)
 		oldY := pdf.GetY()
-		for _, v := range evs {
-			pdf.SetY(pdf.GetY() + eventMargin)
-			drawEvent(v, &widths, true)
+		fields := []*RenderedEventField{
+			{
+				FieldDescription: func(event *RenderedEvent) (str string, bold bool) {
+					return event.Date, true
+				},
+				FieldValue: func(event *RenderedEvent) (str string, bold bool) {
+					return event.Name, true
+				},
+				Render: func(event *RenderedEvent) bool {
+					return true
+				},
+			},
+			{
+				FieldDescription: func(event *RenderedEvent) (str string, bold bool) {
+					return "Treffpunkt:", false
+				},
+				FieldValue: func(event *RenderedEvent) (str string, bold bool) {
+					return event.Venue, false
+				},
+				Render: func(event *RenderedEvent) bool {
+					return event.HasVenue
+				},
+			},
+			{
+				FieldDescription: func(event *RenderedEvent) (str string, bold bool) {
+					return "Beginn:", false
+				},
+				FieldValue: func(event *RenderedEvent) (str string, bold bool) {
+					return event.Begin, false
+				},
+				Render: func(event *RenderedEvent) bool {
+					return event.HasBegin
+				},
+			},
+			{
+				FieldDescription: func(event *RenderedEvent) (str string, bold bool) {
+					return "Adjustierung:", false
+				},
+				FieldValue: func(event *RenderedEvent) (str string, bold bool) {
+					return event.Uniform, false
+				},
+				Render: func(event *RenderedEvent) bool {
+					return event.HasUniform
+				},
+			},
+			{
+				FieldDescription: func(event *RenderedEvent) (str string, bold bool) {
+					return "Ende:", false
+				},
+				FieldValue: func(event *RenderedEvent) (str string, bold bool) {
+					return event.End, false
+				},
+				Render: func(event *RenderedEvent) bool {
+					return event.HasEnd
+				},
+			},
+			{
+				FieldDescription: func(event *RenderedEvent) (str string, bold bool) {
+					return "Notiz:", false
+				},
+				FieldValue: func(event *RenderedEvent) (str string, bold bool) {
+					return event.Note, false
+				},
+				Render: func(event *RenderedEvent) bool {
+					return event.HasNote
+				},
+			},
+		}
+		for _, event := range evs {
+			for _, field := range fields {
+				if field.Render(event) {
+					str, _ := field.FieldDescription(event)
+					widths = append(widths, pdf.GetStringWidth(str))
+				}
+			}
 		}
 		pdf.SetY(oldY)
 		gr := greatest(&widths)
-		oldX := pdf.GetX()
 
-		for _, v := range evs {
-			pdf.SetY(pdf.GetY() + eventMargin)
-			pdf.SetX(oldX + gr + eventMargin)
-			drawEvent(v, &widths, false)
+		for i, v := range evs {
+			if i != 0 {
+				fontSize, _ := pdf.GetFontSize()
+				pdf.Ln(fontSize / 2)
+			}
+			for _, field := range fields {
+				drawEvent(v, field, gr)
+			}
+
 		}
 	}
 
@@ -201,11 +257,11 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 
 	noteBox := func() {
 		if len(note) > 0 {
-			width , height := pdf.GetPageSize()
+			width, height := pdf.GetPageSize()
 			pdf.SetY(height - boxMarginY)
 			pdf.SetFontSize(smallSize)
 			pdf.SetX(infoXMargin)
-			pdf.MultiCell(width-(infoXMargin*2), smallSize/1.5, tr(note), "1", "c",false)
+			pdf.MultiCell(width-(infoXMargin*2), smallSize/1.5, tr(note), "1", "c", false)
 		}
 	}
 
