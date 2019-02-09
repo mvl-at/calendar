@@ -57,7 +57,7 @@ func pdf(rw http.ResponseWriter, r *http.Request) {
 			conf.Obm.Name = obm.FirstName + " " + obm.LastName
 		}
 		if kpm.FirstName != "" || kpm.LastName != "" {
-			conf.Obm.Name = kpm.FirstName + " " + kpm.LastName
+			conf.Kpm.Name = kpm.FirstName + " " + kpm.LastName
 		}
 		rw.Header().Set("Content-Disposition", fmt.Sprintf("inline;filename=\"%s.pdf\"", normalise(rangeString(events, ""))))
 		fpdf(events, note, author.Member.FirstName+" "+author.Member.LastName, rw)
