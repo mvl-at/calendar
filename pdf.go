@@ -59,6 +59,33 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		}
 		return gr
 	}
+	personString := func(person Person, bold bool, role string) string {
+		boldStart := "<b>"
+		boldEnd := "</b>"
+		mailStart := "<a href=\"mailto:" + person.Email + "\">"
+		mailEnd := "</a>"
+		if !bold {
+			boldEnd = ""
+			boldStart = ""
+			mailStart = ""
+			mailEnd = ""
+		}
+		return fmt.Sprintf("%s%s:%s %s, %s, %s, %s%s%s", boldStart, role, boldEnd, person.Name, person.Address, person.Telephone, mailStart, person.Email, mailEnd)
+	}
+	infoHeader := func() {
+		pdf.SetY(pdf.GetY() + infoMargin)
+		pdf.SetFontSize(smallSize)
+		html := pdf.HTMLBasicNew()
+		pageWidth, _ := pdf.GetPageSize()
+		pdf.SetX(infoXMargin)
+		html.Write(smallSize, personString(conf.Obm, true, "Obmann"))
+		pdf.Ln(smallSize / 2)
+		pdf.SetX(infoXMargin)
+		html.Write(smallSize, personString(conf.Kpm, true, "Kapellmeister"))
+		pdf.Ln(smallSize / 2)
+		pdf.SetY(pdf.GetY() + eventMargin)
+		pdf.Line(pdf.GetX()+eventMargin, pdf.GetY(), pageWidth-pdf.GetX()-eventMargin, pdf.GetY())
+	}
 	header := func() {
 		pdf.SetFont("", "B", headerSize)
 		title := conf.Name
@@ -87,6 +114,7 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		pdf.Image("ldf", ((pageWidth-boxWidth)/2-ldfWidth)/2, beginY, ldfWidth, boxHeight, false, "", 0, "")
 		pdf.Image("mvl", (pageWidth-(pageWidth-boxWidth)/4)-mvlWidth/2, beginY+(boxHeight-mvlHeight)/2, mvlWidth, mvlHeight, false, "", 0, "")
 		pdf.Rect((pageWidth-boxWidth)/2, beginY, boxWidth, boxHeight, "D")
+		infoHeader()
 	}
 
 	drawEventLine := func(text string, bold bool, line int) float64 {
@@ -215,6 +243,17 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		gr := greatest(&widths)
 
 		for i, v := range evs {
+			var fieldCount float64 = 0
+			for _, field := range fields {
+				if field.Render(v) {
+					fieldCount++
+				}
+			}
+			_, height := pdf.GetPageSize()
+			fontSize, _ := pdf.GetFontSize()
+			if fieldCount*fontSize > height-pdf.GetY() {
+				pdf.AddPage()
+			}
 			if i != 0 {
 				fontSize, _ := pdf.GetFontSize()
 				pdf.Ln(fontSize / 2)
@@ -224,35 +263,6 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 			}
 
 		}
-	}
-
-	personString := func(person Person, bold bool, role string) string {
-		boldStart := "<b>"
-		boldEnd := "</b>"
-		mailStart := "<a href=\"mailto:" + person.Email + "\">"
-		mailEnd := "</a>"
-		if !bold {
-			boldEnd = ""
-			boldStart = ""
-			mailStart = ""
-			mailEnd = ""
-		}
-		return fmt.Sprintf("%s%s:%s %s, %s, %s, %s%s%s", boldStart, role, boldEnd, person.Name, person.Address, person.Telephone, mailStart, person.Email, mailEnd)
-	}
-
-	infoHeader := func() {
-		pdf.SetY(pdf.GetY() + infoMargin)
-		pdf.SetFontSize(smallSize)
-		html := pdf.HTMLBasicNew()
-		pageWidth, _ := pdf.GetPageSize()
-		pdf.SetX(infoXMargin)
-		html.Write(smallSize, personString(conf.Obm, true, "Obmann"))
-		pdf.Ln(smallSize / 2)
-		pdf.SetX(infoXMargin)
-		html.Write(smallSize, personString(conf.Kpm, true, "Kapellmeister"))
-		pdf.Ln(smallSize / 2)
-		pdf.SetY(pdf.GetY() + eventMargin)
-		pdf.Line(pdf.GetX()+eventMargin, pdf.GetY(), pageWidth-pdf.GetX()-eventMargin, pdf.GetY())
 	}
 
 	noteBox := func() {
@@ -265,8 +275,8 @@ func fpdf(events []*model.Event, note string, author string, writer io.Writer) {
 		}
 	}
 
+	pdf.SetHeaderFunc(header)
 	header()
-	infoHeader()
 	pdf.SetX(0)
 	drawEvents()
 	noteBox()
