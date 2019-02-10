@@ -12,6 +12,7 @@ import (
 const (
 	icalDateFormat = "20060102"
 	icalTimeFormat = "T150400"
+	maxLine        = 70
 )
 
 //main wrapper for event converter
@@ -58,11 +59,15 @@ func musicianConvert(event *model.Event, buffer *strBuffer) {
 		buffer.WriteFmt("DTEND:%s", dateTime(event.Date, event.End))
 	}
 	buffer.WriteFmt("SUMMARY:%s", event.Name)
+	noteSuffix := ""
+	if event.Note != "" {
+		noteSuffix = ", " + event.Note
+	}
 	if event.Internal {
-		buffer.WriteFmt("DESCRIPTION:Adjustierung: %s, %s", event.Uniform, event.Note)
+		buffer.WriteFmt("DESCRIPTION:Adjustierung: %s"+noteSuffix, event.Uniform)
 
 	} else {
-		buffer.WriteFmt("DESCRIPTION:Adjustierung: %s, Beginn: %s — %s, %s", event.Uniform, event.Time.Format("15:04"), event.Place, event.Note)
+		buffer.WriteFmt("DESCRIPTION:Adjustierung: %s, Beginn: %s — %s"+noteSuffix, event.Uniform, event.Time.Format("15:04"), event.Place)
 	}
 	buffer.WriteFmt("LOCATION:%s", event.MusicianPlace)
 	buffer.WriteFmt("END:VEVENT")

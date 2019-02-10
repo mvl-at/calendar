@@ -13,7 +13,26 @@ type strBuffer struct {
 }
 
 func (s *strBuffer) WriteFmt(format string, a ...interface{}) {
-	s.WriteString(fmt.Sprintf(format+"\n", a...))
+	str := fmt.Sprintf(format+"\n", a...)
+	if len(str) > maxLine {
+		str = split(str)
+	}
+	s.WriteString(str)
+}
+
+func split(str string) string {
+	result := ""
+	for i, j := 0, len(str)/maxLine+1; i < j; i++ {
+		lastIndex := (i + 1) * maxLine
+		if i+1 >= j {
+			lastIndex = len(str)
+		}
+		if i > 0 {
+			result += "\n"
+		}
+		result += strings.Repeat(" ", i) + str[i*maxLine:lastIndex]
+	}
+	return result
 }
 
 func rangeString(events []*model.Event, note string) string {
