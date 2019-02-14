@@ -47,7 +47,8 @@ func config() (conf *Configuration) {
 			Name:         "Musikverein Leopoldsdorf/M.",
 			Address:      "A-2285 Leopoldsdorf/M. Kempfendorf 2",
 			ZVR:          "ZVR - Zahl: 091786949",
-			Role:         "events"}
+			Role:         "events",
+			Timezone:     "Europe/Vienna"}
 		enc := json.NewEncoder(fil)
 		enc.SetIndent("", "  ")
 		err = enc.Encode(conf)
@@ -94,6 +95,7 @@ type Configuration struct {
 	Address      string   `json:"address"`
 	ZVR          string   `json:"zvr"`
 	Role         string   `json:"role"`
+	Timezone     string   `json:"timezone"`
 }
 
 type Person struct {

@@ -54,9 +54,9 @@ type threadControl func(events *[]*model.Event, rw http.ResponseWriter, threads 
 //converts events of the view of a musician
 func musicianConvert(event *model.Event, buffer *strBuffer) {
 	buffer.WriteFmt("BEGIN:VEVENT")
-	buffer.WriteFmt("DTSTART:%s", dateTime(event.Date, event.MusicianTime))
+	buffer.WriteFmt("DTSTART%s:%s",timeZone(), dateTime(event.Date, event.MusicianTime))
 	if event.OpenEnd == 0 {
-		buffer.WriteFmt("DTEND:%s", dateTime(event.Date, event.End))
+		buffer.WriteFmt("DTEND%s:%s",timeZone(), dateTime(event.Date, event.End))
 	}
 	buffer.WriteFmt("SUMMARY:%s", event.Name)
 	noteSuffix := ""
@@ -77,9 +77,9 @@ func musicianConvert(event *model.Event, buffer *strBuffer) {
 func externalConvert(event *model.Event, buffer *strBuffer) {
 	if !event.Internal {
 		buffer.WriteFmt("BEGIN:VEVENT")
-		buffer.WriteFmt("DTSTART:%s", dateTime(event.Date, event.Time))
+		buffer.WriteFmt("DTSTART%s:%s",timeZone(), dateTime(event.Date, event.Time))
 		if event.OpenEnd == 0 {
-			buffer.WriteFmt("DTEND:%s", dateTime(event.Date, event.End))
+			buffer.WriteFmt("DTEND%s:%s", timeZone(), dateTime(event.Date, event.End))
 		}
 		buffer.WriteFmt("SUMMARY:%s", event.Name)
 		buffer.WriteFmt("LOCATION:%s", event.Place)
@@ -90,6 +90,13 @@ func externalConvert(event *model.Event, buffer *strBuffer) {
 //concatenates a date and a time to an ical date-time
 func dateTime(date time.Time, time time.Time) string {
 	return date.Format(icalDateFormat) + time.Format(icalTimeFormat)
+}
+
+func timeZone() string {
+	if conf.Timezone == "" {
+		return ""
+	}
+	return ";TZID=" + conf.Timezone
 }
 
 //destroys thread if done and creates a new one
